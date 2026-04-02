@@ -1,287 +1,869 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ExamHub - Smart Quiz Platform</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QuizProcta — Smart Practice. Secure Testing.</title>
+<link rel="icon" type="image/png" href="images/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* ── CSS Variables ──────────────────────────────────────── */
+  :root {
+    --bg:       #060B1A;
+    --bg2:      #0A1128;
+    --bg3:      #0D1530;
+    --blue:     #2B7FFF;
+    --indigo:   #5B4FE8;
+    --cyan:     #00CFFF;
+    --purple:   #9B6EFF;
+    --glow:     rgba(43,127,255,.35);
+    --glow2:    rgba(155,110,255,.25);
+    --text:     #E8EEFF;
+    --muted:    #8A96B8;
+    --card:     rgba(255,255,255,.04);
+    --border:   rgba(255,255,255,.08);
+    --r:        18px;
+    --trans:    all .35s cubic-bezier(.4,0,.2,1);
+  }
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+  /* ── Reset ──────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
 
-    body {
-      background: #0F172A;
-      color: #FFFFFF;
-      line-height: 1.6;
-    }
+  /* ── Noise overlay ──────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: .6;
+  }
 
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 20px;
-    }
+  /* ── Utility ────────────────────────────────────────────── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  .section  { padding: 100px 0; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(43,127,255,.12); border: 1px solid rgba(43,127,255,.3);
+    color: var(--cyan); font-size: 12px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; padding: 6px 16px; border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: pulse-dot 1.4s infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
 
-    .section {
-      margin: 50px 0;
-    }
+  h1,h2,h3,h4 { font-family: 'Syne', sans-serif; line-height: 1.15; }
+  .gradient-text {
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--blue) 40%, var(--purple) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
 
-    h1, h2, h3 {
-      margin-bottom: 12px;
-    }
+  /* ── Fade-in animation ──────────────────────────────────── */
+  .fade-up { opacity: 0; transform: translateY(36px); transition: opacity .7s ease, transform .7s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+  .fade-up.d1 { transition-delay: .1s; }
+  .fade-up.d2 { transition-delay: .2s; }
+  .fade-up.d3 { transition-delay: .3s; }
+  .fade-up.d4 { transition-delay: .4s; }
+  .fade-up.d5 { transition-delay: .5s; }
+  .fade-up.d6 { transition-delay: .6s; }
 
-    p {
-      margin-bottom: 10px;
-      color: #cbd5e1;
-    }
+  /* ── Buttons ────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+    padding: 14px 32px; border-radius: 12px; cursor: pointer;
+    border: none; transition: var(--trans); position: relative; overflow: hidden;
+  }
+  .btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(rgba(255,255,255,.12), transparent);
+    opacity: 0; transition: opacity .3s;
+  }
+  .btn:hover::after { opacity: 1; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--indigo) 60%, var(--purple) 100%);
+    color: #fff;
+    box-shadow: 0 0 24px var(--glow), 0 0 48px rgba(43,127,255,.15), 0 4px 20px rgba(0,0,0,.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 36px var(--glow), 0 0 72px rgba(43,127,255,.2), 0 8px 28px rgba(0,0,0,.5); }
+  .btn-outline {
+    background: transparent; color: var(--cyan);
+    border: 1.5px solid rgba(0,207,255,.35);
+  }
+  .btn-outline:hover { background: rgba(0,207,255,.08); border-color: var(--cyan); transform: translateY(-2px); }
+  .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 
-    .center {
-      text-align: center;
-    }
+  /* ── NAV ────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 20px 0;
+    transition: background .4s, padding .4s, backdrop-filter .4s;
+  }
+  nav.scrolled {
+    background: rgba(6,11,26,.85);
+    backdrop-filter: blur(20px);
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1140px; margin: 0 auto; padding: 0 24px;
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--muted); transition: color .25s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta { padding: 10px 22px; font-size: 14px; }
 
-    .grid {
-      display: grid;
-      gap: 20px;
-    }
+  /* ── HERO ───────────────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+    padding-top: 100px;
+  }
+  .hero-orb {
+    position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none;
+  }
+  .hero-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(43,127,255,.25) 0%, transparent 70%); top: -100px; right: -100px; animation: float1 8s ease-in-out infinite; }
+  .hero-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(155,110,255,.2) 0%, transparent 70%); bottom: 0; left: -150px; animation: float2 10s ease-in-out infinite; }
+  .hero-orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,207,255,.15) 0%, transparent 70%); top: 40%; left: 40%; animation: float1 12s ease-in-out infinite 2s; }
+  @keyframes float1 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-30px) rotate(5deg)} }
+  @keyframes float2 { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(20px) rotate(-5deg)} }
 
-    @media (min-width: 768px) {
-      .grid-3 {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .hero-eyebrow { margin-bottom: 24px; }
+  .hero-h1 { font-size: clamp(42px, 6vw, 72px); font-weight: 800; letter-spacing: -.02em; margin-bottom: 20px; }
+  .hero-desc { font-size: 17px; color: var(--muted); max-width: 460px; margin-bottom: 36px; line-height: 1.8; }
+  .hero-cta-group { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .hero-note {
+    margin-top: 18px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--muted);
+    background: rgba(255,200,50,.06); border: 1px solid rgba(255,200,50,.15);
+    border-radius: 8px; padding: 10px 16px; max-width: 380px;
+  }
+  .hero-note svg { flex-shrink: 0; color: #FFCC32; }
+  .hero-stats { display: flex; gap: 36px; margin-top: 40px; }
+  .stat-item { display: flex; flex-direction: column; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; background: linear-gradient(135deg, var(--cyan), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-lbl { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: .04em; }
 
-    .card {
-      background: #1E293B;
-      padding: 20px;
-      border-radius: 14px;
-      transition: 0.3s;
-    }
+  /* Phone mockup */
+  .phone-wrap {
+    display: flex; justify-content: center; align-items: center;
+    position: relative;
+    animation: float1 7s ease-in-out infinite;
+  }
+  .phone-glow {
+    position: absolute; width: 320px; height: 420px;
+    background: radial-gradient(ellipse, rgba(43,127,255,.3) 0%, rgba(155,110,255,.15) 50%, transparent 80%);
+    filter: blur(40px); border-radius: 50%;
+  }
+  .phone {
+    width: 280px; height: 580px;
+    background: linear-gradient(160deg, #111827, #1a2035);
+    border-radius: 42px;
+    border: 1.5px solid rgba(255,255,255,.12);
+    box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.08);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .phone-notch {
+    width: 100px; height: 28px; background: #060B1A;
+    border-radius: 0 0 20px 20px; margin: 0 auto;
+    position: relative; z-index: 2; flex-shrink: 0;
+  }
+  .phone-screen {
+    flex: 1; padding: 10px 16px 20px;
+    overflow: hidden; display: flex; flex-direction: column; gap: 10px;
+  }
+  .phone-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; font-weight: 600;
+  }
+  .phone-header .app-name { background: linear-gradient(135deg, var(--cyan), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; }
+  .ph-card {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07);
+    border-radius: 12px; padding: 12px; font-size: 9px; color: #9BA8C8;
+  }
+  .ph-card .ph-title { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--text); font-size: 11px; margin-bottom: 6px; }
+  .ph-quiz-q { background: rgba(43,127,255,.1); border: 1px solid rgba(43,127,255,.2); border-radius: 8px; padding: 8px; margin-bottom: 6px; color: #CBD5F0; font-size: 9px; }
+  .ph-opt { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 6px; background: rgba(255,255,255,.04); margin-bottom: 4px; font-size: 9px; }
+  .ph-opt.correct { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); color: #4ade80; }
+  .ph-opt-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; flex-shrink: 0; }
+  .ph-opt.correct .ph-opt-dot { background: #4ade80; }
+  .ph-badge { display: inline-block; background: linear-gradient(135deg, var(--blue), var(--indigo)); color: #fff; font-size: 8px; font-weight: 700; padding: 3px 8px; border-radius: 100px; margin-bottom: 6px; }
+  .ph-progress-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,.08); margin-top: 6px; overflow: hidden; }
+  .ph-progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--cyan), var(--blue)); width: 65%; }
+  .ph-home-btn { background: linear-gradient(135deg, var(--blue), var(--indigo)); border: none; border-radius: 10px; padding: 9px; text-align: center; font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; color: #fff; box-shadow: 0 4px 12px rgba(43,127,255,.4); cursor: pointer; margin-top: auto; }
 
-    .card:hover {
-      transform: translateY(-5px);
-    }
+  /* ── ABOUT ──────────────────────────────────────────────── */
+  #about { background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+  .section-label { font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--cyan); margin-bottom: 12px; }
+  .section-h2 { font-size: clamp(30px, 4vw, 48px); font-weight: 800; letter-spacing: -.02em; margin-bottom: 20px; }
+  .section-desc { font-size: 16px; color: var(--muted); line-height: 1.85; margin-bottom: 28px; }
+  .about-note {
+    background: rgba(155,110,255,.08); border: 1px solid rgba(155,110,255,.2);
+    border-radius: 12px; padding: 16px 20px; font-size: 13px; color: #C4B8FF; line-height: 1.6;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .about-note svg { flex-shrink: 0; margin-top: 2px; }
+  .about-cards { display: flex; flex-direction: column; gap: 16px; }
+  .about-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 24px;
+    transition: var(--trans); cursor: default;
+  }
+  .about-card:hover { background: rgba(255,255,255,.07); border-color: rgba(43,127,255,.3); transform: translateX(6px); }
+  .about-card-icon {
+    width: 42px; height: 42px; border-radius: 10px; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .about-card h4 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .about-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+  .ic-blue { background: rgba(43,127,255,.15); }
+  .ic-purple { background: rgba(155,110,255,.15); }
+  .ic-cyan { background: rgba(0,207,255,.12); }
+  .ic-green { background: rgba(34,197,94,.12); }
 
-    .button {
-      display: inline-block;
-      padding: 12px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      margin: 8px;
-      font-weight: bold;
-    }
+  /* ── FEATURES ───────────────────────────────────────────── */
+  #features { background: var(--bg); }
+  .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .feat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 32px 28px;
+    transition: var(--trans); position: relative; overflow: hidden; cursor: default;
+  }
+  .feat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    opacity: 0; transition: opacity .35s;
+  }
+  .feat-card:hover { background: rgba(255,255,255,.06); border-color: rgba(43,127,255,.25); transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,.4), 0 0 30px var(--glow); }
+  .feat-card:hover::before { opacity: 1; }
+  .feat-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin-bottom: 20px;
+  }
+  .feat-card h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .feat-card p { font-size: 14px; color: var(--muted); line-height: 1.75; }
 
-    .primary {
-      background: #2563EB;
-      color: white;
-    }
+  /* ── WHY CHOOSE ─────────────────────────────────────────── */
+  #why {
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    position: relative; overflow: hidden;
+  }
+  #why::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 80% 50%, rgba(155,110,255,.08) 0%, transparent 70%);
+  }
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .why-visual {
+    display: flex; flex-direction: column; gap: 14px; position: relative;
+  }
+  .why-card {
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 24px;
+    display: flex; align-items: center; gap: 16px;
+    transition: var(--trans);
+  }
+  .why-card:hover { background: rgba(255,255,255,.07); transform: translateX(8px); border-color: rgba(43,127,255,.3); }
+  .why-card-num {
+    width: 40px; height: 40px; flex-shrink: 0; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), var(--indigo));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: #fff;
+    box-shadow: 0 4px 14px rgba(43,127,255,.35);
+  }
+  .why-card-text h4 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .why-card-text p { font-size: 13px; color: var(--muted); }
+  .why-right .section-desc { margin-bottom: 32px; }
+  .why-highlight {
+    background: linear-gradient(135deg, rgba(43,127,255,.1), rgba(155,110,255,.08));
+    border: 1px solid rgba(155,110,255,.2);
+    border-radius: 16px; padding: 28px;
+  }
+  .why-highlight h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .why-highlight p { font-size: 14px; color: var(--muted); }
+  .why-highlight .big-q {
+    font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    line-height: 1; margin-bottom: 8px;
+  }
 
-    .secondary {
-      border: 1px solid #2563EB;
-      color: #2563EB;
-    }
+  /* ── DOWNLOAD ───────────────────────────────────────────── */
+  #download {
+    background: var(--bg);
+    position: relative; overflow: hidden;
+    text-align: center;
+  }
+  #download::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(43,127,255,.12) 0%, rgba(155,110,255,.06) 40%, transparent 70%);
+  }
+  .dl-box {
+    background: linear-gradient(135deg, rgba(43,127,255,.08) 0%, rgba(155,110,255,.06) 100%);
+    border: 1px solid rgba(43,127,255,.2);
+    border-radius: 28px; padding: 72px 60px; max-width: 780px; margin: 0 auto;
+    position: relative; overflow: hidden;
+  }
+  .dl-box::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), var(--blue), var(--purple), transparent);
+  }
+  .dl-h2 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; letter-spacing: -.02em; margin-bottom: 16px; }
+  .dl-desc { font-size: 16px; color: var(--muted); max-width: 500px; margin: 0 auto 36px; }
+  .dl-btn-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
+  .dl-btn { font-size: 17px; padding: 18px 48px; border-radius: 16px; }
+  .dl-meta { display: flex; justify-content: center; gap: 24px; font-size: 13px; color: var(--muted); flex-wrap: wrap; margin-bottom: 28px; }
+  .dl-meta span { display: flex; align-items: center; gap: 6px; }
+  .dl-disclaimer {
+    background: rgba(255,255,255,.03); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; font-size: 13px; color: var(--muted);
+    max-width: 560px; margin: 0 auto; line-height: 1.65;
+  }
+  .dl-disclaimer + .dl-disclaimer { margin-top: 12px; }
 
-    ul {
-      padding-left: 18px;
-    }
+  /* ── PREVIEW ────────────────────────────────────────────── */
+  #preview { background: var(--bg2); }
+  .preview-track {
+    display: flex; gap: 28px; overflow-x: auto; padding: 16px 0 20px;
+    scrollbar-width: thin; scrollbar-color: rgba(43,127,255,.3) transparent;
+    justify-content: center; flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .preview-phone {
+    flex-shrink: 0; width: 220px;
+    background: linear-gradient(160deg, #0F1628, #1a2440);
+    border-radius: 36px; border: 1.5px solid rgba(255,255,255,.1);
+    box-shadow: 0 30px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: var(--trans);
+  }
+  .preview-phone:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 40px var(--glow); }
+  .pp-notch { width: 70px; height: 22px; background: #060B1A; border-radius: 0 0 14px 14px; margin: 0 auto; }
+  .pp-body { padding: 10px 14px 18px; flex: 1; }
+  .pp-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; font-size: 8px;
+  }
+  .pp-appname { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px; background: linear-gradient(135deg, var(--cyan), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .pp-section-title { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+  .pp-mini-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 10px; margin-bottom: 8px; }
+  .pp-mini-row { display: flex; align-items: center; gap: 6px; font-size: 9px; color: var(--muted); }
+  .pp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .pp-label { font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 100px; }
+  .pp-score-ring {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: conic-gradient(var(--blue) 0%, var(--purple) 70%, rgba(255,255,255,.06) 70%);
+    display: flex; align-items: center; justify-content: center; margin: 8px auto;
+  }
+  .pp-score-inner { width: 54px; height: 54px; border-radius: 50%; background: #0F1628; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+  .pp-btn { background: linear-gradient(135deg, var(--blue), var(--indigo)); border-radius: 8px; padding: 8px; text-align: center; font-family: 'Syne', sans-serif; font-size: 9px; font-weight: 700; color: #fff; margin-top: 6px; }
+  .pp-list-item { display: flex; align-items: center; gap: 6px; padding: 7px 8px; border-radius: 7px; background: rgba(255,255,255,.04); margin-bottom: 5px; font-size: 9px; color: #9BA8C8; }
+  .pp-list-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .pp-warning { background: rgba(251,146,60,.12); border: 1px solid rgba(251,146,60,.25); border-radius: 8px; padding: 8px; margin-bottom: 6px; font-size: 8px; color: #FCA55D; display: flex; gap: 5px; align-items: flex-start; }
+  .pp-code-input { background: rgba(43,127,255,.08); border: 1px solid rgba(43,127,255,.25); border-radius: 8px; padding: 8px; text-align: center; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: .15em; color: var(--cyan); margin: 8px 0; }
+  .pp-caption { text-align: center; font-size: 12px; color: var(--muted); margin-top: 12px; font-weight: 500; }
 
-    li {
-      margin-bottom: 6px;
-    }
+  /* ── FOOTER ─────────────────────────────────────────────── */
+  footer {
+    background: var(--bg); border-top: 1px solid var(--border);
+    padding: 60px 0 32px;
+  }
+  .footer-inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; }
+  .footer-logo { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; background: linear-gradient(135deg, var(--cyan), var(--blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .footer-tagline { font-size: 14px; color: var(--muted); }
+  .footer-divider { width: 100%; max-width: 500px; height: 1px; background: var(--border); }
+  .footer-copy { font-size: 13px; color: var(--muted); }
+  .footer-disclaimer { font-size: 12px; color: rgba(138,150,184,.6); max-width: 500px; text-align: center; line-height: 1.7; }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      margin-top: 10px;
-    }
+  /* ── Divider ────────────────────────────────────────────── */
+  .section-divider { text-align: center; margin-bottom: 64px; }
+  .section-divider .section-h2 { margin-bottom: 14px; }
+  .section-divider .section-desc { max-width: 560px; margin: 0 auto; }
 
-    .hero {
-      padding: 60px 0;
-    }
+  /* ── Real phone frame ──────────────────────────────────── */
+  .real-phone-frame {
+    width: 290px; height: 600px;
+    background: linear-gradient(160deg, #111827, #1a2035);
+    border-radius: 44px;
+    border: 2px solid rgba(255,255,255,.14);
+    box-shadow: 0 40px 80px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 rgba(255,255,255,.1), 0 0 50px rgba(43,127,255,.15);
+    padding: 6px;
+    position: relative; z-index: 1;
+  }
+  .real-phone-inner {
+    width: 100%; height: 100%;
+    border-radius: 39px;
+    overflow: hidden;
+  }
 
-    .hero h1 {
-      font-size: 42px;
-    }
+  /* ── Real screenshot preview cards ─────────────────────── */
+  .real-preview-phone {
+    flex-shrink: 0; width: 200px;
+    background: linear-gradient(160deg, #0F1628, #1a2440);
+    border-radius: 36px; border: 2px solid rgba(255,255,255,.1);
+    box-shadow: 0 30px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
+    padding: 5px;
+    transition: var(--trans);
+  }
+  .real-preview-phone:hover { transform: translateY(-10px) scale(1.03); box-shadow: 0 40px 80px rgba(0,0,0,.65), 0 0 40px var(--glow); border-color: rgba(43,127,255,.4); }
+  .real-preview-phone img { width: 100%; border-radius: 32px; display: block; }
 
-    .hero h2 {
-      font-size: 24px;
-      color: #94a3b8;
-    }
+  /* ── App icon badge ─────────────────────────────────────── */
+  .app-icon-badge {
+    width: 72px; height: 72px; border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(43,127,255,.4), 0 0 0 1px rgba(255,255,255,.1);
+    margin-bottom: 24px;
+  }
 
-    .cta {
-      margin-top: 20px;
-    }
-  </style>
-
+  /* ── Responsive ─────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .hero-grid, .about-grid, .why-grid { grid-template-columns: 1fr; gap: 48px; }
+    .phone-wrap { display: none; }
+    .feat-grid { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+    .hero-stats { gap: 24px; }
+    .dl-box { padding: 48px 28px; }
+  }
+  @media (max-width: 600px) {
+    .feat-grid { grid-template-columns: 1fr; }
+    .section { padding: 72px 0; }
+    .dl-meta { flex-direction: column; align-items: center; gap: 10px; }
+	#nav-download-btn{
+		display: none;
+	}
+  }
+</style>
 </head>
-
 <body>
 
-<div class="container">
-
-  <!-- HERO -->
-
-  <div class="section hero center">
-    <h1>ExamHub</h1>
-    <h2>Smart Quiz & Exam Platform</h2>
-    <p>Create • Practice • Analyze</p>
-    <p><b>Learn smarter. Teach better. Evaluate faster.</b></p>
-
-<div class="cta">
-  <a href="#" class="button primary">Download App</a>
-  <a href="#" class="button secondary">Login</a>
-</div>
-
-
-  </div>
-
-  <!-- ROLES -->
-
-  <div class="section">
-    <h2 class="center">Built for Everyone in Education</h2>
-
-
-<div class="grid grid-3">
-
-  <div class="card">
-    <h3>⚙ Admin</h3>
-    <p>Manage the central quiz system</p>
-    <ul>
-      <li>Create quizzes</li>
-      <li>Upload Excel</li>
-      <li>Generate from images</li>
-      <li>Maintain question bank</li>
+<!-- ██ NAV ████████████████████████████████████████████████████ -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="images/icon.png" alt="QuizProcta" style="width:36px;height:36px;border-radius:9px;flex-shrink:0;" />
+      <span class="nav-logo">QuizProcta</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#why">Why Us</a></li>
+      <li><a href="#preview">Preview</a></li>
     </ul>
+    <a href="#download" class="btn btn-primary nav-cta" id="nav-download-btn">
+      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a.75.75 0 0 1 .75.75v9.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V2.75A.75.75 0 0 1 10 2Z"/><path d="M3 15.25a.75.75 0 0 1 .75.75v1.25h12.5V16a.75.75 0 0 1 1.5 0v2a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 18v-2a.75.75 0 0 1 .75-.75Z"/></svg>
+      Download APK
+    </a>
   </div>
+</nav>
 
-  <div class="card">
-    <h3>👩‍🏫 Teacher</h3>
-    <p>Create and manage quizzes</p>
-    <ul>
-      <li>Upload Excel</li>
-      <li>Generate from images</li>
-      <li>Use default questions</li>
-      <li>Track student results</li>
-    </ul>
+
+<!-- ██ HERO ████████████████████████████████████████████████████ -->
+<section id="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow fade-up">
+          <img src="images/icon.png" alt="QuizProcta Icon" class="app-icon-badge" />
+          <span class="tag">Now Available for Testing</span>
+        </div>
+        <h1 class="hero-h1 fade-up d1">
+          Smart Practice.<br>
+          <span class="gradient-text">Secure Testing.</span>
+        </h1>
+        <p class="hero-desc fade-up d2">
+          QuizProcta brings intelligent quiz practice and real exam proctoring 
+          together — empowering students to learn deeply and teachers to assess 
+          with confidence.
+        </p>
+        <div class="hero-cta-group fade-up d3">
+          <a href="#download" class="btn btn-primary">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a.75.75 0 0 1 .75.75v9.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V2.75A.75.75 0 0 1 10 2Z"/><path d="M3 15.25a.75.75 0 0 1 .75.75v1.25h12.5V16a.75.75 0 0 1 1.5 0v2a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 18v-2a.75.75 0 0 1 .75-.75Z"/></svg>
+            Download APK
+          </a>
+          <a href="#features" class="btn btn-outline">See Features</a>
+        </div>
+        <div class="hero-note fade-up d4">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495ZM10 5a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 5Zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+          This app is currently available for testing purposes only.
+        </div>
+        <div class="hero-stats fade-up d5">
+          <div class="stat-item">
+            <span class="stat-num">AI</span>
+            <span class="stat-lbl">Quiz Generation</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">100%</span>
+            <span class="stat-lbl">Secure Proctoring</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">PDF</span>
+            <span class="stat-lbl">Result Export</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real App Screenshot -->
+      <div class="phone-wrap fade-up d3">
+        <div class="phone-glow"></div>
+        <div class="real-phone-frame">
+          <div class="real-phone-inner">
+            <img src="images/screen_home.png" alt="QuizProcta Student Home" style="width:100%;height:100%;object-fit:cover;border-radius:36px;" />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="card">
-    <h3>🎓 Student</h3>
-    <p>Practice and improve</p>
-    <ul>
-      <li>Attempt quizzes</li>
-      <li>Practice questions</li>
-      <li>Track performance</li>
-      <li>Download results</li>
-    </ul>
+
+<!-- ██ ABOUT ███████████████████████████████████████████████████ -->
+<section id="about" class="section">
+  <div class="container">
+    <div class="about-grid">
+      <!-- Left: cards -->
+      <div class="about-cards">
+        <div class="about-card fade-up">
+          <div class="about-card-icon ic-blue">📝</div>
+          <h4>For Teachers — Create Quizzes Effortlessly</h4>
+          <p>Upload an Excel sheet to instantly generate a quiz, or let AI create one from uploaded images. Review every student's attempts from a unified dashboard.</p>
+        </div>
+        <div class="about-card fade-up d1">
+          <div class="about-card-icon ic-purple">🎓</div>
+          <h4>For Students — Attempt & Track</h4>
+          <p>Join any quiz using a unique quiz code shared by your teacher. Download your results as a PDF and monitor your improvement over time.</p>
+        </div>
+        <div class="about-card fade-up d2">
+          <div class="about-card-icon ic-cyan">🔒</div>
+          <h4>Proctored Environment</h4>
+          <p>Real-time proctoring during every quiz. Suspicious behaviour triggers warnings — exceed the limit and you're disqualified. Fair testing for everyone.</p>
+        </div>
+        <div class="about-card fade-up d3">
+          <div class="about-card-icon ic-green">📖</div>
+          <h4>Curated Study Materials</h4>
+          <p>Access curated learning resources instantly through direct links—no browsing required.</p>
+        </div>
+      </div>
+
+      <!-- Right: text -->
+      <div class="fade-up d1">
+        <div class="section-label">About the App</div>
+        <h2 class="section-h2">One App.<br><span class="gradient-text">Infinite Learning.</span></h2>
+        <p class="section-desc">
+          QuizProcta redefines how students prepare and how teachers assess. It
+          combines AI-powered quiz creation, secure exam proctoring, and carefully curated external resource links, all in one lightweight mobile experience.
+        </p>
+        <p class="section-desc" style="margin-bottom:24px">
+          Whether you're a teacher building a surprise test or a student cramming
+          for finals, QuizProcta has the right tool for you — all without
+          compromising integrity.
+        </p>
+        <div class="about-note fade-up d2">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="#9B6EFF"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd"/></svg>
+          <span><strong style="color:#C4B8FF">Transparency Notice:</strong> Study material resources are collected from trusted external educational platforms to help students learn better. QuizProcta does not claim ownership of any third-party content.</span>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-</div>
 
+<!-- ██ FEATURES ████████████████████████████████████████████████ -->
+<section id="features" class="section">
+  <div class="container">
+    <div class="section-divider fade-up">
+      <div class="tag">Features</div>
+      <h2 class="section-h2">Everything You Need to <span class="gradient-text">Learn & Test</span></h2>
+      <p class="section-desc">Six powerful pillars that make QuizProcta the most honest and effective quiz platform for education.</p>
+    </div>
 
+    <div class="feat-grid">
+      <div class="feat-card fade-up">
+        <div class="feat-icon ic-blue">🧠</div>
+        <h3>Smart Quiz Practice</h3>
+        <p>AI-generated quizzes from image uploads or custom Excel sheets let teachers create high-quality assessments in seconds. Students get focused, meaningful practice every session.</p>
+      </div>
+      <div class="feat-card fade-up d1">
+        <div class="feat-icon" style="background:rgba(239,68,68,.12)">🛡️</div>
+        <h3>Secure Exam Mode</h3>
+        <p>Full proctoring during every active quiz. Every suspicious action is logged and warned. Exceeding the maximum warning count triggers automatic disqualification — keeping the playing field level.</p>
+      </div>
+      <div class="feat-card fade-up d2">
+        <div class="feat-icon ic-cyan">📚</div>
+        <h3>Study Materials Hub</h3>
+        <p>Seamless access to curated resources from trusted external educational platforms. One tap navigates students to the right content — no searching, no distraction.</p>
+      </div>
+      <div class="feat-card fade-up d3">
+        <div class="feat-icon ic-purple">📈</div>
+        <h3>Performance Tracking</h3>
+        <p>Students can review their own attempt history and download detailed result reports as PDFs. Teachers get a bird's-eye view of class performance across all attempts.</p>
+      </div>
+      <div class="feat-card fade-up d4">
+        <div class="feat-icon ic-green">✨</div>
+        <h3>Clean & Simple UI</h3>
+        <p>A minimal, distraction-free interface designed for focus. Every screen is purposefully laid out so students spend time thinking — not figuring out the app.</p>
+      </div>
+      <div class="feat-card fade-up d5">
+        <div class="feat-icon" style="background:rgba(251,146,60,.12)">⚡</div>
+        <h3>Fast & Lightweight</h3>
+        <p>Optimised for low-end devices and limited data connections. No bloated features — just what you need, loading instantly, every time.</p>
+      </div>
+    </div>
   </div>
-
-  <!-- QUIZ CREATION -->
-
-  <div class="section">
-    <h2 class="center">Create Quizzes in Seconds</h2>
+</section>
 
 
-<div class="grid grid-3">
+<!-- ██ WHY CHOOSE ██████████████████████████████████████████████ -->
+<section id="why" class="section">
+  <div class="container">
+    <div class="why-grid">
+      <!-- Numbered cards -->
+      <div class="why-visual">
+        <div class="why-card fade-up">
+          <div class="why-card-num">1</div>
+          <div class="why-card-text">
+            <h4>No Cheating. Just Learning.</h4>
+            <p>Proctoring and auto-disqualification enforce genuine effort every time.</p>
+          </div>
+        </div>
+        <div class="why-card fade-up d1">
+          <div class="why-card-num">2</div>
+          <div class="why-card-text">
+            <h4>Built for Both Roles</h4>
+            <p>Dedicated flows for teachers and students — no overlap, no confusion.</p>
+          </div>
+        </div>
+        <div class="why-card fade-up d2">
+          <div class="why-card-num">3</div>
+          <div class="why-card-text">
+            <h4>Effortless to Use</h4>
+            <p>Zero learning curve. Create a quiz or join one in under 60 seconds.</p>
+          </div>
+        </div>
+        <div class="why-card fade-up d3">
+          <div class="why-card-num">4</div>
+          <div class="why-card-text">
+            <h4>Measurable Progress</h4>
+            <p>PDF reports let students track improvement and teachers spot weaknesses early.</p>
+          </div>
+        </div>
+        <div class="why-card fade-up d4">
+          <div class="why-card-num">5</div>
+          <div class="why-card-text">
+            <h4>Trusted & Transparent</h4>
+            <p>We clearly credit all external study resources — no false ownership claims.</p>
+          </div>
+        </div>
+      </div>
 
-  <div class="card">
-    <h3>📊 Excel Upload</h3>
-    <p>Upload Excel sheets and instantly create quizzes.</p>
+      <!-- Right text block -->
+      <div class="fade-up d1">
+        <div class="section-label">Why QuizProcta</div>
+        <h2 class="section-h2">Where Integrity <span class="gradient-text">Meets Intelligence</span></h2>
+        <p class="section-desc">
+          Most quiz apps focus only on content delivery. QuizProcta goes further — it
+          ensures the results actually mean something by building trust between
+          students and teachers through secure, verifiable assessments.
+        </p>
+        <div class="why-highlight">
+          <div class="big-q">"</div>
+          <h3>Focus on Learning,<br>Not Cheating.</h3>
+          <p style="margin-top:10px">Our philosophy is simple: when the environment is fair, every student can discover their true potential.</p>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="card">
-    <h3>🖼 Image to Quiz</h3>
-    <p>Upload images and automatically generate questions.</p>
+
+<!-- ██ DOWNLOAD ████████████████████████████████████████████████ -->
+<section id="download" class="section">
+  <div class="container">
+    <div class="dl-box fade-up">
+      <img src="images/icon.png" alt="QuizProcta" style="width:88px;height:88px;border-radius:22px;margin:0 auto 28px;display:block;box-shadow:0 8px 36px rgba(43,127,255,.45),0 0 0 1px rgba(255,255,255,.1);" />
+      <div class="tag" style="margin-bottom:28px">Get the App</div>
+      <h2 class="dl-h2">Download <span class="gradient-text">QuizProcta</span></h2>
+      <p class="dl-desc">Get the APK now and start experiencing smarter practice and secure testing on your device.</p>
+
+      <div class="dl-btn-wrap">
+        <a href="#" class="btn btn-primary dl-btn">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="20" height="20"><path d="M10 2a.75.75 0 0 1 .75.75v9.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V2.75A.75.75 0 0 1 10 2Z"/><path d="M3 15.25a.75.75 0 0 1 .75.75v1.25h12.5V16a.75.75 0 0 1 1.5 0v2a.75.75 0 0 1-.75.75H3.75A.75.75 0 0 1 3 18v-2a.75.75 0 0 1 .75-.75Z"/></svg>
+          Download QuizProcta APK
+        </a>
+      </div>
+
+      <div class="dl-meta">
+        <span>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="color:var(--cyan)"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z" clip-rule="evenodd"/></svg>
+          Version 1.0.0 (Beta)
+        </span>
+        <span>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="color:var(--blue)"><path d="M3.5 2.75a.75.75 0 0 0-1.5 0v14.5a.75.75 0 0 0 1.5 0v-4.392l1.657-.348a21.025 21.025 0 0 1 8.088.005l1.174.246a.75.75 0 0 0 .914-.573A21 21 0 0 0 15 7.545v-.346c0-.05-.005-.1-.014-.148a.75.75 0 0 0-.57-.602 22.519 22.519 0 0 0-7.939-.093l-1.977.415V2.75Z"/></svg>
+          Android 7.0+
+        </span>
+        <span>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" style="color:var(--purple)"><path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clip-rule="evenodd"/></svg>
+          Free to Download
+        </span>
+      </div>
+
+      <div class="dl-disclaimer">
+        ⚠️ <strong>Testing Notice:</strong> This version is for testing purposes only. Features, data, and design may change in future releases.
+      </div>
+      <div class="dl-disclaimer" style="margin-top:12px">
+        📖 <strong>Content Notice:</strong> Study materials are sourced from third-party educational providers. QuizProcta does not claim ownership of any external educational content.
+      </div>
+    </div>
   </div>
+</section>
 
-  <div class="card">
-    <h3>📚 Question Bank</h3>
-    <p>Use built-in questions for quick practice.</p>
+
+<!-- ██ PREVIEW █████████████████████████████████████████████████ -->
+<section id="preview" class="section">
+  <div class="container">
+    <div class="section-divider fade-up">
+      <div class="tag">App Screens</div>
+      <h2 class="section-h2">See It in <span class="gradient-text">Action</span></h2>
+      <p class="section-desc">A quick look at the screens students and teachers interact with every day.</p>
+    </div>
+
+    <div class="preview-track">
+
+      <!-- Screen 1: Student Home -->
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="real-preview-phone fade-up">
+          <img src="images/en_home.png" alt="Student Home Screen" />
+        </div>
+        <p class="pp-caption fade-up d1">Student Dashboard</p>
+      </div>
+
+      <!-- Screen 2: Quiz Entry -->
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="real-preview-phone fade-up d1">
+          <img src="images/screen_quizentry.png" alt="Quiz Entry Screen" />
+        </div>
+        <p class="pp-caption fade-up d2">Join with Quiz Code</p>
+      </div>
+
+      <!-- Screen 3: Active Quiz Session with Proctoring -->
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="real-preview-phone fade-up d2">
+          <img src="images/screen_quizsession.png" alt="Quiz Session with Proctoring" />
+        </div>
+        <p class="pp-caption fade-up d3">Live Quiz + Proctoring</p>
+      </div>
+
+      <!-- Screen 4: Attempts History -->
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="real-preview-phone fade-up d3">
+          <img src="images/screen_attempts.png" alt="Attempts History" />
+        </div>
+        <p class="pp-caption fade-up d4">My Attempts History</p>
+      </div>
+
+      <!-- Screen 5: Teacher Dashboard -->
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="real-preview-phone fade-up d4">
+          <img src="images/screen_teacher.png" alt="Teacher Dashboard" />
+        </div>
+        <p class="pp-caption fade-up d5">Teacher Dashboard</p>
+      </div>
+
+    </div>
   </div>
+</section>
 
-</div>
 
-
+<!-- ██ FOOTER ██████████████████████████████████████████████████ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <img src="images/icon.png" alt="QuizProcta" style="width:60px;height:60px;border-radius:16px;box-shadow:0 4px 20px rgba(43,127,255,.3);" />
+      <div class="footer-logo">QuizProcta</div>
+      <div class="footer-tagline">Smart Practice. Secure Testing.</div>
+      <div class="footer-divider"></div>
+      <div class="footer-copy">© 2026 QuizProcta. All rights reserved.</div>
+      <div class="footer-disclaimer">
+        Study materials displayed within the app belong to their respective
+        external educational sources. QuizProcta does not claim ownership of
+        third-party content. This application is currently available for testing purposes only.
+      </div>
+    </div>
   </div>
-
-  <!-- PERFORMANCE -->
-
-  <div class="section">
-    <h2 class="center">Performance & Insights</h2>
+</footer>
 
 
-<div class="card">
-  <ul>
-    <li>📊 Analytics dashboard</li>
-    <li>📈 Score tracking</li>
-    <li>🏆 Leaderboards</li>
-    <li>📋 Quiz history</li>
-  </ul>
-  <p><b>Understand strengths and improve weaknesses.</b></p>
-</div>
+<!-- ██ JS ██████████████████████████████████████████████████████ -->
+<script>
+  /* Nav scroll */
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
 
+  /* Intersection observer for fade-up */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
 
-  </div>
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-  <!-- PROCTORING -->
+  /* Smooth scroll for anchor links */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
 
-  <div class="section">
-    <h2 class="center">Secure Online Exams</h2>
-
-
-<div class="card">
-  <ul>
-    <li>👁 Face monitoring</li>
-    <li>📱 Activity tracking</li>
-    <li>⚠ Suspicious alerts</li>
-    <li>🛡 Anti-cheating system</li>
-  </ul>
-  <p><b>Fair and secure exam experience.</b></p>
-</div>
-
-
-  </div>
-
-  <!-- QUIZ ENTRY -->
-
-  <div class="section">
-    <h2 class="center">Try a Quiz</h2>
-
-
-<div class="card">
-  <p>Enter quiz code shared by your teacher:</p>
-  <input type="text" placeholder="Enter Quiz Code" />
-  <br><br>
-  <a href="#" class="button primary">Start Quiz</a>
-</div>
-
-
-  </div>
-
-  <!-- CTA -->
-
-  <div class="section center">
-    <h2>Start Your Learning Journey</h2>
-    <p>Join ExamHub and improve your learning experience.</p>
-
-
-<a href="#" class="button primary">Download Now</a>
-<a href="#" class="button secondary">Register</a>
-
-
-  </div>
-
-</div>
-
+  /* Glowing cursor trail on hero */
+  const hero = document.getElementById('hero');
+  hero.addEventListener('mousemove', (e) => {
+    const dot = document.createElement('div');
+    dot.style.cssText = `
+      position:fixed; pointer-events:none; border-radius:50%;
+      width:6px; height:6px; background:rgba(43,127,255,.5);
+      left:${e.clientX-3}px; top:${e.clientY-3}px;
+      transition: opacity .5s, transform .5s; z-index:50;
+    `;
+    document.body.appendChild(dot);
+    requestAnimationFrame(() => { dot.style.opacity = '0'; dot.style.transform = 'scale(3)'; });
+    setTimeout(() => dot.remove(), 500);
+  });
+</script>
 </body>
 </html>
